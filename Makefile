@@ -8,4 +8,4 @@ change-version:
 build: change-version
 	rm -rf ./dist
 	pnpm build
-	pnnpm build:firefox
+	pnpm build:firefox
