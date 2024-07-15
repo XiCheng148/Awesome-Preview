@@ -1,0 +1,30 @@
+{
+  "manifest_version": 2,
+  "name": "Smart Page",
+  "version": "0.1.0",
+  "description": "A browser extension that lets you browse linked pages without leaving the current one.",
+  "icons": {
+    "16": "logo.png",
+    "32": "logo.png",
+    "48": "logo.png",
+    "128": "logo.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/content/index.tsx"]
+    }
+  ],
+  "browser_action": {
+    "default_popup": "src/popup/index.html"
+  },
+  "background": {
+    "scripts": ["src/background/index.ts"]
+  },
+  "permissions": ["webRequest", "webRequestBlocking", "<all_urls>", "storage"],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "{a4ae78e4-6d6b-4b7e-b333-e74e31964021}"
+    }
+  }
+}

@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .header-icon-btn {
+    @apply text-zinc-800 hover:text-zinc-400 dark:text-zinc-100;
+  }
+
+  .kbd {
+    @apply inline-block rounded border px-1 py-0.5 leading-none;
+  }
+
+  .react-draggable-dragging .draggable-iframe-cover {
+    display: block;
+    z-index: 2147483647;
+  }
+
+  .draggable-iframe-cover {
+    position: absolute;
+    display: none;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+}
