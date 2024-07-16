@@ -75,4 +75,4 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           draft: false
-          files: release/smart-page-chrome-extension-${{ steps.get_version.outputs.version-without-v }}.zip release/smart-page-firefox-extension-${{ steps.get_version.outputs.version-without-v }}.zip
+          files: ${{ github.workspace }}/release/smart-page-chrome-extension-${{ steps.get_version.outputs.version-without-v }}.zip ${{ github.workspace }}/release/smart-page-firefox-extension-${{ steps.get_version.outputs.version-without-v }}.zip
