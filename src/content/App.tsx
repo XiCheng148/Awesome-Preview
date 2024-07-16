@@ -77,7 +77,7 @@ export default function App({ open, url, title, loading }: Props) {
 
   return (
     <div
-      className={open.value ? 'fixed inset-0 backdrop-blur-xl' : ''}
+      className={open.value ? 'fixed inset-0 backdrop-blur-xl z-[999999999999999999] absolute' : ''}
       // style={{
       //   'background-image': 'linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%)',
       // }}
