@@ -43,7 +43,6 @@ jobs:
         shell: bash
         run: |
           echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
       - uses: actions/cache@v3
         name: Setup pnpm cache
         with:
@@ -51,7 +50,6 @@ jobs:
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
-
       - name: Install dependencies
         run: pnpm install
 
@@ -69,9 +67,12 @@ jobs:
           zip -r smart-page-chrome-extension-${{ steps.get_version.outputs.version-without-v }}.zip ./smart-page-chrome-extension-${{ steps.get_version.outputs.version-without-v }}/*
           zip -r smart-page-firefox-extension-${{ steps.get_version.outputs.version-without-v }}.zip ./smart-page-firefox-extension-${{ steps.get_version.outputs.version-without-v }}/*
 
+      - name: List release directory contents
+        run: ls -la release
+
       - name: Upload extensions to release
         id: upload-release-asset
         uses: softprops/action-gh-release@v1
         with:
-          draft: true
-          files: release/smart-chrome-extension-${{ steps.get_version.outputs.version-without-v }}.zip release/smart-firefox-extension-${{ steps.get_version.outputs.version-without-v }}.zip
+          draft: false
+          files: release/smart-page-chrome-extension-${{ steps.get_version.outputs.version-without-v }}.zip release/smart-page-firefox-extension-${{ steps.get_version.outputs.version-without-v }}.zip
