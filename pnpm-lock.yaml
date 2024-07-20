@@ -1,4 +1,4 @@
-lockfileVersion: 5.3
+lockfileVersion: "9"
 
 specifiers:
   '@preact/preset-vite': ^2.5.0
