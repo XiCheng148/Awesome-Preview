@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Smart Page",
+  "name": "Awesome Preview",
   "version": "0.1.0",
-  "description": "A browser extension that lets you browse linked pages without leaving the current one.",
+  "description": "不用离开页面直接预览网页",
   "icons": {
     "16": "logo.png",
     "32": "logo.png",

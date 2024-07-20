@@ -3,7 +3,9 @@ import { ISettings } from '../common/types';
 import { getSettings } from '../common/utils';
 
 export function useSettings() {
-  const [settings, setSettings] = useState<ISettings>();
+  const [settings, setSettings] = useState<ISettings>({
+    urlList: [],
+  });
 
   useEffect(() => {
     (async () => {

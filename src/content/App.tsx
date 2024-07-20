@@ -1,10 +1,15 @@
 import { Signal } from '@preact/signals'
-import { IoIosExpand, IoMdClose, IoMdOpen } from 'react-icons/io'
+import {
+  IoIosExpand,
+  IoMdClose,
+  IoIosOpen,
+  IoMdLink,
+  IoMdCheckmark
+} from 'react-icons/io'
 import { CgSpinnerAlt } from 'react-icons/cg'
-import { useCallback, useRef } from 'preact/hooks'
+import { useCallback, useRef, useState } from 'preact/hooks'
 import useOnClickOutside from '../hooks/use-onclickoutside'
 import { AnimatePresence, motion, Variants } from 'framer-motion'
-import Toaster from '../components/Toaster'
 import Draggable from 'react-draggable'
 
 type Props = {
@@ -12,30 +17,61 @@ type Props = {
   url: Signal<string | null>
   title: Signal<string | null>
   loading: Signal<boolean>
+  origin: Signal<{ x: number; y: number }>
 }
 
 const variants: Variants = {
   open: {
     opacity: 1,
-    height: '100%',
+    scale: 1,
     width: '100%',
-    x: 0,
-    y: 0,
-    transition: { duration: 0.1 },
+    height: '100%',
+    transition: {
+      type: 'spring',
+      stiffness: 300,
+      damping: 30,
+      duration: 0.5
+    }
   },
   closed: {
     opacity: 0,
-    height: '50%',
-    width: '50%',
-    x: '25%',
-    y: '25%',
-    transition: { duration: 0.1 },
+    scale: 0.1,
+    width: '100%',
+    height: '100%',
+    transition: {
+      type: 'spring',
+      stiffness: 300,
+      damping: 35,
+      duration: 0.5
+    }
   },
+  buttonVariants: {
+    idle: { scale: 1 },
+    hover: { scale: 1.1, transition: { duration: 0.2 } }
+  },
+  iconVariants: {
+    idle: { rotate: 135, scale: 1 },
+    loading: { rotate: 0, scale: 1 },
+    success: {
+      rotate: 0,
+      scale: [1.2, 1],
+      transition: { scale: { duration: 0.2 } }
+    }
+  }
 }
-
-export default function App({ open, url, title, loading }: Props) {
+export default function App({ open, url, title, loading, origin }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const iframeRef = useRef<HTMLIFrameElement | null>(null)
+
+  const getSystemTheme = () => {
+    if (
+      window.matchMedia &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches
+    ) {
+      return 'dark'
+    }
+    return 'light'
+  }
 
   function handleClose() {
     open.value = false
@@ -75,30 +111,56 @@ export default function App({ open, url, title, loading }: Props) {
     openUrl && window.open(openUrl, '_blank')
   }
 
+  const [copyState, setCopyState] = useState<'idle' | 'loading' | 'success'>(
+    'idle'
+  )
+
+  function handleCopyLink(event: MouseEvent) {
+    event.stopPropagation()
+
+    const iframeDocument = iframeRef.current?.contentDocument
+    const openUrl = getOpenUrl(iframeDocument?.location.href)
+    if (openUrl) {
+      setCopyState('loading')
+      navigator.clipboard
+        .writeText(openUrl)
+        .then(() => {
+          setCopyState('success')
+          setTimeout(() => setCopyState('idle'), 1000) // 2秒后回到初始状态
+        })
+        .catch(() => {
+          setCopyState('idle') // 如果复制失败，回到初始状态
+        })
+    }
+  }
+
   return (
-    <div
-      className={open.value ? 'fixed inset-0 backdrop-blur-xl z-[999999999999999999] absolute' : ''}
-      // style={{
-      //   'background-image': 'linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%)',
-      // }}
-    >
-      <AnimatePresence>
-        {open.value && url.value && (
+    <AnimatePresence>
+      {open.value && url.value && (
+        <div
+          className="fixed inset-0 backdrop-blur-xl z-[999999999999999999]"
+          onWheel={(e) => e.preventDefault()}
+        >
           <Draggable handle="[data-drag-region]" cancel="button">
-            <div className="fixed z-[2147483646] flex h-full right-20 left-20 lg:right-48 lg:left-48 xl:right-64 xl:left-64 rounded-b-xl overflow-hidden shadow-2xl">
+            <div className="fixed z-[999999999999999999] flex h-full right-36 left-36 rounded-xl shadow-2xl">
               <motion.div
-                className="shadow-xl relative"
+                className="shadow-xl relative flex"
                 ref={containerRef}
-                animate="open"
-                exit="closed"
                 variants={variants}
                 initial="closed"
+                animate="open"
+                exit="closed"
+                style={{
+                  originX: origin.value.x / window.innerWidth,
+                  originY: origin.value.y / window.innerHeight
+                }}
               >
-                <div
-                  data-drag-region
-                  className="grid h-10 grid-cols-6 items-center gap-4 rounded-t-xl bg-zinc-200 px-4 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-100"
-                >
-                  <div className="col-span-4 col-start-2 inline-flex items-center justify-center gap-2">
+                {/* Main Panel */}
+                <div className="flex-grow">
+                  <div
+                    data-drag-region
+                    className="flex-grow flex h-10 items-center justify-center gap-4 rounded-t-xl px-4 text-zinc-900 dark:text-white backdrop-blur-md light:bg-white/60 dark:bg-black/60"
+                  >
                     {loading.value ? (
                       <i className="h-5 w-5 shrink-0 animate-spin">
                         <CgSpinnerAlt size={22} />
@@ -110,38 +172,108 @@ export default function App({ open, url, title, loading }: Props) {
                       {title}
                     </span>
                   </div>
-                  <div className="flex items-center justify-end gap-2">
-                    <button
-                      onClick={handleOpenInNewTab}
-                      className="header-icon-btn"
+                  <div className="draggable-iframe-cover" />
+                  <iframe
+                    ref={iframeRef}
+                    src={`${url.value}${
+                      url.value.includes('?') ? '&' : '?'
+                    }theme=${getSystemTheme()}`}
+                    onLoad={handleOnLoad}
+                    className="h-[calc(100%-40px)] w-full select-none border-none bg-zinc-50 rounded-b-xl"
+                  />
+                </div>
+
+                {/* Side Panel for Buttons */}
+                <div className="absolute top-0 -right-14 flex flex-col justify-start pt-2 gap-3">
+                  <motion.div
+                    className="backdrop-blur-md bg-white/60 dark:bg-black/60 rounded-full p-2 shadow-lg dark:shadow-zinc-800 light:shadow-zinc-900"
+                    variants={variants.buttonVariants}
+                    initial="idle"
+                    whileHover="hover"
+                  >
+                    <motion.button
+                      className="p-1 rounded transition-colors"
+                      onClick={handleClose}
                     >
-                      <IoMdOpen size={20} />
-                    </button>
-                    <button
-                      className="header-icon-btn rotate-[270deg]"
+                      <IoMdClose
+                        size={22}
+                        className="dark:text-white text-zinc-900"
+                      />
+                    </motion.button>
+                  </motion.div>
+                  <motion.div
+                    className="backdrop-blur-md bg-white/60 dark:bg-black/60 rounded-full p-2 shadow-lg dark:shadow-zinc-800 light:shadow-zinc-900"
+                    variants={variants.buttonVariants}
+                    initial="idle"
+                    whileHover="hover"
+                  >
+                    <motion.button
+                      className="p-1 rounded transition-colors rotate-[270deg]"
                       onClick={handleOpenInMainFrame}
                     >
-                      <IoIosExpand size={20} />
-                    </button>
-                    <button className="header-icon-btn" onClick={handleClose}>
-                      <IoMdClose size={20} />
-                    </button>
-                  </div>
+                      <IoIosExpand
+                        size={20}
+                        className="dark:text-white text-zinc-900"
+                      />
+                    </motion.button>
+                  </motion.div>
+                  <motion.div
+                    className="backdrop-blur-md bg-white/60 dark:bg-black/60 rounded-full p-2 shadow-lg dark:shadow-zinc-800 light:shadow-zinc-900"
+                    variants={variants.buttonVariants}
+                    initial="idle"
+                    whileHover="hover"
+                  >
+                    <motion.button
+                      onClick={handleOpenInNewTab}
+                      className="p-1 rounded transition-colors"
+                    >
+                      <IoIosOpen
+                        size={20}
+                        className="dark:text-white text-zinc-900"
+                      />
+                    </motion.button>
+                  </motion.div>
+                  <motion.div
+                    className="backdrop-blur-md bg-white/60 dark:bg-black/60 rounded-full p-2 shadow-lg dark:shadow-zinc-800 light:shadow-zinc-900"
+                    variants={variants.buttonVariants}
+                    initial="idle"
+                    whileHover="hover"
+                  >
+                    <motion.button
+                      className="p-1 rounded transition-colors transform transition-all"
+                      onClick={handleCopyLink}
+                      disabled={copyState === 'loading'}
+                    >
+                      <motion.div
+                        variants={variants.iconVariants}
+                        animate={copyState}
+                        initial="idle"
+                      >
+                        {copyState === 'loading' ? (
+                          <CgSpinnerAlt
+                            size={20}
+                            className="dark:text-white text-zinc-900 animate-spin"
+                          />
+                        ) : copyState === 'success' ? (
+                          <IoMdCheckmark
+                            size={20}
+                            className="dark:text-white text-zinc-900"
+                          />
+                        ) : (
+                          <IoMdLink
+                            size={20}
+                            className="dark:text-white text-zinc-900"
+                          />
+                        )}
+                      </motion.div>
+                    </motion.button>
+                  </motion.div>
                 </div>
-                <div className="draggable-iframe-cover" />
-                <iframe
-                  ref={iframeRef}
-                  src={url.value}
-                  onLoad={handleOnLoad}
-                  className="h-[calc(100%-40px)] w-full select-none border-none bg-zinc-50"
-                />
               </motion.div>
             </div>
           </Draggable>
-        )}
-      </AnimatePresence>
-
-      <Toaster />
-    </div>
+        </div>
+      )}
+    </AnimatePresence>
   )
 }
