@@ -61,18 +61,27 @@ jobs:
       - name: Package plugin and create userscript
         run: |
           mkdir release
-          mv dist/chromium release/smart-page-chrome-extension-${{ steps.get_version.outputs.version-without-v }}
-          mv dist/firefox release/smart-page-firefox-extension-${{ steps.get_version.outputs.version-without-v }}
+          mv dist/chromium release/awesome-preview-chrome-extension-${{ steps.get_version.outputs.version-without-v }}
+          mv dist/firefox release/awesome-preview-firefox-extension-${{ steps.get_version.outputs.version-without-v }}
           cd release
-          zip -r smart-page-chrome-extension-${{ steps.get_version.outputs.version-without-v }}.zip ./smart-page-chrome-extension-${{ steps.get_version.outputs.version-without-v }}/*
-          zip -r smart-page-firefox-extension-${{ steps.get_version.outputs.version-without-v }}.zip ./smart-page-firefox-extension-${{ steps.get_version.outputs.version-without-v }}/*
-
-      - name: List release directory contents
-        run: ls -la release
+          zip -r awesome-preview-chrome-extension-${{ steps.get_version.outputs.version-without-v }}.zip ./awesome-preview-chrome-extension-${{ steps.get_version.outputs.version-without-v }}/*
+          zip -r awesome-preview-firefox-extension-${{ steps.get_version.outputs.version-without-v }}.zip ./awesome-preview-firefox-extension-${{ steps.get_version.outputs.version-without-v }}/*
 
       - name: Upload extensions to release
         id: upload-release-asset
         uses: softprops/action-gh-release@v1
         with:
           draft: false
-          files: ${{ github.workspace }}/release/smart-page-chrome-extension-${{ steps.get_version.outputs.version-without-v }}.zip ${{ github.workspace }}/release/smart-page-firefox-extension-${{ steps.get_version.outputs.version-without-v }}.zip
+          files: |
+            ${{ github.workspace }}/release/awesome-preview-chrome-extension-${{ steps.get_version.outputs.version-without-v }}.zip
+            ${{ github.workspace }}/release/awesome-preview-firefox-extension-${{ steps.get_version.outputs.version-without-v }}.zip
+
+            - name: List release directory contents
+              run: ls -la release
+
+            - name: Upload extensions to release
+              id: upload-release-asset
+              uses: softprops/action-gh-release@v1
+              with:
+                draft: false
+                files: ${{ github.workspace }}/release/awesome-preview-chrome-extension-${{ steps.get_version.outputs.version-without-v }}.zip ${{ github.workspace }}/release/awesome-preview-firefox-extension-${{ steps.get_version.outputs.version-without-v }}.zip
