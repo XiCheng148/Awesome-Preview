@@ -1,66 +1,102 @@
-import { signal } from '@preact/signals'
+import { signal, effect } from '@preact/signals'
 import { render } from 'preact'
+import { useEffect, useCallback } from 'preact/hooks'
 import browser from 'webextension-polyfill'
 import { getSettings } from '../common/utils'
 import App from './App'
 import '../styles/global.css'
 
-const containerId = '__XiCheng_awesome-preview-container'
+const CONTAINER_ID = '__XiCheng_awesome-preview-container'
 
-const open = signal(false)
-const url = signal<string | null>(null)
-const title = signal<string | null>(null)
-const loading = signal(false)
-const shiftKey = signal(false)
-const origin = signal({ x: 0, y: 0 })
+const state = {
+  open: signal(false),
+  url: signal<string | null>(null),
+  title: signal<string | null>(null),
+  loading: signal(false),
+  shiftKey: signal(false),
+  origin: signal({ x: 0, y: 0 }),
+}
 
-function shouldHandleClickEvent(href: string) {
+const isValidUrl = (href: string): boolean => {
   if (!href) return false
-
   try {
     const url = new URL(href)
-
-    if (url.origin === location.origin && url.pathname === location.pathname) {
-      return false
-    }
-
-    // mixed content will be blocked by browser
-    if (url.protocol !== location.protocol) {
-      return false
-    }
+    return (
+      url.origin !== location.origin ||
+      url.pathname !== location.pathname
+    ) && url.protocol === location.protocol
   } catch (err) {
     console.error(err)
     return false
   }
-  if (/^(mailto|tel|javascript):/.test(href)) {
-    return false
-  }
-  return true
 }
 
-// function destroyApp() {
-//   const container = document.querySelector(`#${containerId}`);
-//   container && render(null, container);
-// }
+const handleWindowClickEvent = (event: MouseEvent) => {
+  if (!state.shiftKey.value) return
 
-function handleWindowClickEvent(event: MouseEvent) {
-  if (!shiftKey.value) return false
-  const composedPath = event.composedPath()
-  const target = composedPath.find((node) => node instanceof HTMLAnchorElement)
+  const target = event.composedPath().find((node): node is HTMLAnchorElement => node instanceof HTMLAnchorElement)
 
-  if (target instanceof HTMLAnchorElement) {
-    const shouldHandle = shouldHandleClickEvent(target.href)
-    if (shouldHandle) {
-      event.preventDefault()
-      event.stopPropagation()
-      origin.value = { x: event.clientX, y: event.clientY }
-      console.log(`🚀 ~ handleWindowClickEvent ~ origin.value:`, origin.value)
-      url.value = target.href
-      open.value = true
-      title.value = target.text
-      loading.value = true
-    }
+  if (target && isValidUrl(target.href) && !/^(mailto|tel|javascript):/.test(target.href)) {
+    event.preventDefault()
+    event.stopPropagation()
+    state.origin.value = { x: event.clientX, y: event.clientY }
+    state.url.value = target.href
+    state.open.value = true
+    state.title.value = target.text
+    state.loading.value = true
   }
+}
+
+function AppWrapper() {
+  const handleKeyEvent = useCallback((event: KeyboardEvent) => {
+    if (event.key === 'Shift') {
+      state.shiftKey.value = event.type === 'keydown'
+    } else if (event.key === 'Escape' && state.open.value) {
+      state.open.value = false
+    }
+  }, [])
+
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyEvent)
+    window.addEventListener('keyup', handleKeyEvent)
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyEvent)
+      window.removeEventListener('keyup', handleKeyEvent)
+    }
+  }, [handleKeyEvent])
+
+  useEffect(() => {
+    const setup = async () => {
+      const settings = await getSettings()
+      const currentUrl = `${location.origin}${location.pathname}`
+      if (!settings.urlList.includes(currentUrl)) {
+        window.addEventListener('click', handleWindowClickEvent, { capture: true })
+      }
+    }
+
+    setup()
+
+    return () => {
+      window.removeEventListener('click', handleWindowClickEvent, { capture: true })
+    }
+  }, [])
+
+  useEffect(() => {
+    const messageListener = (message: any) => {
+      const action = message.type === 'enable' ? 'addEventListener' : 'removeEventListener'
+      window[action]('click', handleWindowClickEvent, { capture: true })
+    }
+
+    browser.runtime.onMessage.addListener(messageListener)
+
+    return () => {
+      browser.runtime.onMessage.removeListener(messageListener)
+    }
+  }, [])
+
+  return <App {...state} />
 }
 
 async function main() {
@@ -71,14 +107,11 @@ async function main() {
   const shadowRoot = root.attachShadow({ mode: 'open' })
 
   const appContainer = document.createElement('div')
-  appContainer.id = containerId
+  appContainer.id = CONTAINER_ID
   shadowRoot.appendChild(appContainer)
 
   if (import.meta.hot) {
-    const { addViteStyleTarget } = await import(
-      '@samrum/vite-plugin-web-extension/client'
-    )
-
+    const { addViteStyleTarget } = await import('@samrum/vite-plugin-web-extension/client')
     await addViteStyleTarget(shadowRoot)
   } else {
     import.meta.PLUGIN_WEB_EXT_CHUNK_CSS_PATHS.forEach((cssPath) => {
@@ -89,59 +122,7 @@ async function main() {
     })
   }
 
-  render(
-    <App
-      open={open}
-      url={url}
-      title={title}
-      loading={loading}
-      origin={origin}
-    />,
-    appContainer
-  )
-
-  const settings = await getSettings()
-  const currentUrl = `${location.origin}${location.pathname}`
-  if (!settings.urlList.includes(currentUrl)) {
-    window.addEventListener('click', handleWindowClickEvent, { capture: true })
-  }
-  window.addEventListener('keydown', function (event) {
-    if (event.key === 'Shift') {
-      shiftKey.value = true
-    }
-  })
-
-  window.addEventListener(
-    'keyup',
-    function (event) {
-      if (event.key === 'Shift') {
-        shiftKey.value = false
-      }
-    },
-    {
-      capture: true
-    }
-  )
-
-  browser.runtime.onMessage.addListener(
-    (message) => {
-      switch (message.type) {
-        case 'enable':
-          window.addEventListener('click', handleWindowClickEvent, {
-            capture: true
-          })
-          break
-        case 'disable':
-          window.removeEventListener('click', handleWindowClickEvent, {
-            capture: true
-          })
-          break
-      }
-    },
-    {
-      capture: true
-    }
-  )
+  render(<AppWrapper />, appContainer)
 }
 
 main()

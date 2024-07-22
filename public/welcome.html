@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Awesome Preview</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background-color: #f0f0f0;
+        transition: background-color 0.3s ease;
+      }
+      .container {
+        text-align: center;
+        background-color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        max-width: 600px;
+        transition: background-color 0.3s ease;
+      }
+      h1 {
+        color: #333;
+        margin-bottom: 1rem;
+      }
+      p {
+        color: #666;
+        line-height: 1.6;
+      }
+      .feature-list {
+        text-align: left;
+        margin-top: 1rem;
+      }
+      .feature-item {
+        margin-bottom: 0.5rem;
+      }
+      .cta-button {
+        display: inline-block;
+        margin-top: 1rem;
+        padding: 0.5rem 1rem;
+        background-color: #4caf50;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        transition: background-color 0.3s ease;
+      }
+      .cta-button:hover {
+        background-color: #45a049;
+      }
+
+      /* 暗色模式 */
+      @media (prefers-color-scheme: dark) {
+        body {
+          background-color: #333;
+        }
+        .container {
+          background-color: #444;
+        }
+        h1 {
+          color: #f0f0f0;
+        }
+        p {
+          color: #ccc;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>欢迎使用Awesome Preview！</h1>
+      <p>告别标签页混乱，让您的网页浏览更加高效、有序、愉悦！</p>
+      <div class="feature-list">
+        <div class="feature-item">✨ 智能预览：Shift+点击链接</div>
+        <div class="feature-item">🔧 灵活操作：多种链接处理选项</div>
+        <div class="feature-item">📋 自定义黑名单</div>
+        <div class="feature-item">🌓 智能主题：适应系统明暗模式</div>
+        <div class="feature-item">⌨️ 快捷关闭：按ESC键</div>
+      </div>
+      <a href="#" class="cta-button">开始体验</a>
+    </div>
+  </body>
+</html>
