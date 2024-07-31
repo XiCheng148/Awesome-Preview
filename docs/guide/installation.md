@@ -10,15 +10,15 @@ chrome://extensions
 
 ## 打开开发者模式
 <div align="center">
-  <img width="750" src="../public/开发者.png" />
+  <img width="750" src="../public/dev.png" />
 </div>
 
 ## 加载插件
 <div align="center">
-  <img width="750" src="../public/加载.png" />
+  <img width="750" src="../public/load.png" />
 </div>
 
 ## 选择目录
 <div align="center">
-<img width="750" src="../public/选择.png" />
+<img width="750" src="../public/choose.png" />
 </div>
