@@ -6,6 +6,9 @@
   "scripts": {
     "build": "vite build && pnpm build:firefox",
     "build:firefox": "cross-env EXTENSION=firefox vite build",
+    "zip:chromium": "zip -r dist/chromium.zip dist/chromium",
+    "zip:firefox": "zip -r dist/firefox.zip dist/firefox",
+    "zip:all": "pnpm run zip:chromium && pnpm run zip:firefox",
     "dev": "vite",
     "lint": "eslint src/**/*.{ts,tsx} --cache",
     "docs:dev": "vitepress dev --port 8080",
