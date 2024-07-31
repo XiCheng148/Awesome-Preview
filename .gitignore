@@ -3,5 +3,5 @@ node_modules/
 .DS_Store
 .eslintcache
 dist/
-.vitepress/cache
+docs/.vitepress/cache
 *.json-e

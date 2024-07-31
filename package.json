@@ -11,9 +11,9 @@
     "zip:all": "pnpm run zip:chromium && pnpm run zip:firefox",
     "dev": "vite",
     "lint": "eslint src/**/*.{ts,tsx} --cache",
-    "docs:dev": "vitepress dev --port 8080",
-    "docs:build": "vitepress build",
-    "docs:preview": "vitepress preview"
+    "docs:dev": "vitepress dev docs --port 8080",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "keywords": [],
   "author": "",
