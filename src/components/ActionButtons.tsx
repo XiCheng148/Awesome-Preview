@@ -18,7 +18,7 @@ type Props = {
 
 const buttonVariants: Variants = {
   idle: { scale: 1 },
-  hover: { scale: 1.1, transition: { duration: 0.2 } }
+  hover: { scale: 1.15, transition: { duration: 0.2 } }
 }
 
 const iconVariants: Variants = {
@@ -108,13 +108,13 @@ type ActionButtonProps = {
 function ActionButton({ onClick, icon, disabled, className, variants, animate }: ActionButtonProps) {
   return (
     <motion.div
-      className="backdrop-blur-md bg-white/60 dark:bg-black/60 rounded-full p-1 shadow-lg"
+      className="w-[42px] h-[42px] backdrop-blur-md bg-white/60 dark:bg-black/60 rounded-full shadow-lg flex items-center justify-center cursor-pointer"
       variants={buttonVariants}
       initial="idle"
       whileHover="hover"
     >
       <motion.button
-        className={`p-1 rounded transition-colors text-zinc-900 dark:text-white ${className}`}
+        className={`rounded transition-colors text-zinc-900 dark:text-white ${className}`}
         onClick={onClick}
         disabled={disabled}
         variants={variants}

@@ -48,24 +48,29 @@ const handleWindowClickEvent = (event: MouseEvent) => {
 }
 
 function AppWrapper() {
-  const handleKeyEvent = useCallback((event: KeyboardEvent) => {
+  const handleKeyDown = useCallback((event: KeyboardEvent) => {
     if (event.key === 'Shift') {
-      state.shiftKey.value = event.type === 'keydown'
+      state.shiftKey.value = true
+    }
+  }, [])
+
+  const handleKeyUp = useCallback((event: KeyboardEvent) => {
+    if (event.key === 'Shift') {
+      state.shiftKey.value = false
     } else if (event.key === 'Escape' && state.open.value) {
       state.open.value = false
     }
   }, [])
 
-
   useEffect(() => {
-    window.addEventListener('keydown', handleKeyEvent)
-    window.addEventListener('keyup', handleKeyEvent)
+    window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('keyup', handleKeyUp)
 
     return () => {
-      window.removeEventListener('keydown', handleKeyEvent)
-      window.removeEventListener('keyup', handleKeyEvent)
+      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('keyup', handleKeyUp)
     }
-  }, [handleKeyEvent])
+  }, [handleKeyDown, handleKeyUp])
 
   useEffect(() => {
     const setup = async () => {

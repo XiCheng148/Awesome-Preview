@@ -31,9 +31,7 @@ const variants: Variants = {
   }),
   closed: (custom) => ({
     opacity: 0,
-    scale: 0.1,
-    // x: custom.x,
-    // y: custom.y,
+    scale: 0.2,
     width: 0,
     height: 0,
     left: custom.x,
@@ -42,17 +40,19 @@ const variants: Variants = {
       type: 'spring',
       stiffness: 300,
       damping: 35,
-      duration: 0.5
+      duration: 0.3
     }
   })
 }
 
 export default function PreviewWindow({ open, url, title, loading, origin }: Props) {
+  let backdrop = ''
   const containerRef = useRef<HTMLDivElement | null>(null)
   const iframeRef = useRef<HTMLIFrameElement | null>(null)
 
   const handleClose = () => {
     open.value = false
+    backdrop =  ''
   }
 
   const getContainer = useCallback(() => containerRef.current, [])
@@ -73,7 +73,6 @@ export default function PreviewWindow({ open, url, title, loading, origin }: Pro
     }
 
     if (open.value) {
-      document.body.style.overflow = 'hidden'
       window.addEventListener('wheel', preventScroll, { passive: false })
     }
 
@@ -85,7 +84,7 @@ export default function PreviewWindow({ open, url, title, loading, origin }: Pro
 
   return (
       <motion.div
-        className="fixed z-[999999999999999999] flex rounded-xl shadow-2xl bg-white/10 dark:bg-black/10 backdrop-blur-lg border border-white/20 dark:border-black/20"
+        className={`${backdrop} fixed z-[999999999999999999] flex rounded-xl shadow-2xl bg-white/10 dark:bg-black/10 border border-white/20 dark:border-black/20 `}
         ref={containerRef}
         variants={variants}
         initial="closed"
@@ -100,18 +99,13 @@ export default function PreviewWindow({ open, url, title, loading, origin }: Pro
           <TitleBar title={title} loading={loading} />
           <iframe
             ref={iframeRef}
-            src={`${url.value}${url.value?.includes('?') ? '&' : '?'}theme=${getSystemTheme()}`}
+            src={`${url.value}`}
             onLoad={handleOnLoad}
             className="flex-grow w-full select-none border-none bg-zinc-50 rounded-b-xl"
+            style={{ transform: 'translateZ(0)' }}
           />
         </div>
         <ActionButtons iframeRef={iframeRef} url={url} handleClose={handleClose} />
       </motion.div>
   )
-}
-
-function getSystemTheme() {
-  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-    ? 'dark'
-    : 'light'
 }

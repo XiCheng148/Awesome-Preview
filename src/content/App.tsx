@@ -15,7 +15,7 @@ export default function App(state: State) {
     <AnimatePresence>
       {state.open.value && state.url.value && (
         <div
-          className="fixed inset-0 backdrop-blur-xl z-[999999999999999999]"
+          className="fixed inset-0 bg-[rgba(0,0,0,0.68)] z-[999999999999999999]"
           onWheel={(e) => e.preventDefault()}
         >
           <PreviewWindow {...state} />
