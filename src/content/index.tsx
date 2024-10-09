@@ -32,7 +32,7 @@ const isValidUrl = (href: string): boolean => {
 }
 
 const handleWindowClickEvent = (event: MouseEvent) => {
-  if (!state.shiftKey.value) return
+  if (!event.shiftKey) return
 
   const target = event.composedPath().find((node): node is HTMLAnchorElement => node instanceof HTMLAnchorElement)
 
